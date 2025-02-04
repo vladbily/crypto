@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, Float, Column
+from sqlalchemy import Integer, String, Float, Column, DateTime
 from back.src.database import Base
 
 class Asset(Base):
@@ -8,7 +8,4 @@ class Asset(Base):
     name = Column(String)
     amount = Column(Float)
     price = Column(Float)
-    date = Column(String)
-    
-    
-    
+    date = Column(DateTime)

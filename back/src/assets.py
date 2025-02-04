@@ -1,13 +1,14 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class AssetBase(BaseModel):
     name: str
     amount: float
     price: float
-    date: str
+    date: datetime
     
 class AssetModel(AssetBase):
     id: int
     
     class Config():
-        orm_mode = True
+        from_attributes = True

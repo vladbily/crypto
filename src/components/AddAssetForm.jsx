@@ -59,18 +59,24 @@ export default function AddAssetForm({ onClose }) {
         )
     }
 
-    function onFinish(values) {
-        console.log('finish', values)
+    async function onFinish(values) {
+        console.log('finish', values);
         const newAsset = {
-            id: coin.id,
+            name: coin.id,
             amount: values.amount,
-            price: values.amount,
-            date: values.date?.$d ?? new Date(),
+            price: values.price,
+            date: values.date ? values.date.toISOString() : new Date().toISOString(),
+        };
+        assetRef.current = newAsset;
+
+        try {
+            await addAsset(newAsset);
+            setSubmitted(true);
+        } catch (error) {
+            console.error('Failed to add asset:', error);
         }
-        assetRef.current = newAsset
-        setSubmitted(true)
-        addAsset(newAsset)
     }
+
 
     function handleAmountChange(value) {
         const price = form.getFieldValue('price')

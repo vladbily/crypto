@@ -1,21 +1,24 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException
 from back.src.assets import AssetBase, AssetModel
-from back.src.database import db_dependency, get_db
-from back.src.models import Asset
+from back.src.client import get_asset_client
+from back.src.database_hepler import AssetClient
 
 router_assets = APIRouter(
     prefix="/assets"
 )
 
 @router_assets.get("/", response_model=list[AssetModel])
-def get_assets(db: Session = Depends(get_db)):
-    return db.query(Asset).all()
+async def get_assets(asset_client: AssetClient = Depends(get_asset_client)):
+    return await asset_client.get_all()
 
 @router_assets.post("/", response_model=AssetModel)
-async def add_asset(asset: AssetBase, db: db_dependency):
-    db_asset = Asset(**asset.model_dump())
-    db.add(db_asset)
-    db.commit()
-    db.refresh(db_asset)
-    return db_asset
+async def add_asset(asset: AssetBase, asset_client: AssetClient = Depends(get_asset_client)):
+    return await asset_client.create(asset_data=asset)
+
+@router_assets.delete("/{asset_id}")
+async def delete_asset(asset_id: int, asset_client: AssetClient = Depends(get_asset_client)):
+    try:
+        await asset_client.delete(asset_id)
+        return {"status": "success"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

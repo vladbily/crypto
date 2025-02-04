@@ -1,40 +1,67 @@
+import React, { useContext, useState } from 'react';
 import { Layout, Card, Statistic, List, Typography, Tag } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
-import { useContext } from 'react';
 import CryptoContext from '../../context/crypto-context';
+import AppModal from './AppModal';
 
 const siderStyle = {
   padding: '1rem',
-};
-
-const handleClick = (item) => {
-  console.log('Clicked item:', item);
-  alert(`You clicked on ${item.title}`);
+  height: 'calc(100vh - 64px)',
+  overflowY: 'auto',
+  backgroundColor: '#001529' // Добавляем фон контейнера
 };
 
 export default function AppSider() {
-  const { assets } = useContext(CryptoContext)
+  const { assets, deleteAsset } = useContext(CryptoContext);
+  const [selectedAsset, setSelectedAsset] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCardClick = (asset) => {
+    setSelectedAsset(asset);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteAsset(selectedAsset.id);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error deleting asset:', error);
+    }
+  };
 
   return (
-    <Layout.Sider width="25%" style={siderStyle}>
+    <Layout.Sider
+      width="25%"
+      style={siderStyle}
+      theme="light" // Фикс белой полосы
+    >
       {assets.map((asset) => (
-        <Card key={asset.id} style={{ marginBottom: '1rem' }}>
+        <Card
+          key={asset.id}
+          style={{
+            marginBottom: '1rem',
+            cursor: 'pointer',
+            borderRadius: '8px' // Фикс закруглений
+          }}
+          onClick={() => handleCardClick(asset)}
+        >
           <Statistic
-            title={asset.id}
+            title={asset.name}
             value={asset.totalAmount}
             precision={2}
             valueStyle={{ color: asset.grow ? '#3f8600' : '#cf1322' }}
             prefix={asset.grow ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
-            suffix="$" />
+            suffix="$"
+          />
           <List
-            size='small'
+            size="small"
             dataSource={[
               { title: 'Total Profit', value: asset.totalProfit, withTag: true },
               { title: 'Amount', value: asset.amount, isPlain: true },
-              //{ title: 'Difference', value: asset.growPercent },
             ]}
             renderItem={(item) => (
-              <List.Item onClick={() => handleClick(item)} style={{ cursor: 'pointer' }}>
+              <List.Item style={{ cursor: 'pointer' }}>
                 <span>{item.title}</span>
                 <span>
                   {item.withTag && (
@@ -54,6 +81,13 @@ export default function AppSider() {
           />
         </Card>
       ))}
+
+      <AppModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onDelete={handleConfirmDelete}
+        selectedAsset={selectedAsset}
+      />
     </Layout.Sider>
-  )
+  );
 }

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from back.src.router_curr import router_curr
 from back.src.router_assets import router_assets
 from fastapi.middleware.cors import CORSMiddleware
+from back.src.database import init_db
 
 origins = [
     "http://localhost:5173",
@@ -9,6 +10,7 @@ origins = [
 ]
 
 app = FastAPI()
+init_db()
 
 app.add_middleware(
     CORSMiddleware,
