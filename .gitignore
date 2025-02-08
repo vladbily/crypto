@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 *.env
 *.gitignore
+git rm --cached .env
+git rm --cached .gitignore
+
