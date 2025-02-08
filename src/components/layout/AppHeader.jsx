@@ -12,6 +12,7 @@ const headerStyle = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#26091b'
 };
 
 export default function AppHeader() {
@@ -37,6 +38,7 @@ export default function AppHeader() {
     }
     return <Layout.Header style={headerStyle}>
         <Select
+            className="custom-select"
             style={{ width: 250 }}
             open={select}
             onSelect={handleSelect}
@@ -56,7 +58,8 @@ export default function AppHeader() {
                 </Space>
             )}
         />
-        <Button type="primary" onClick={() => setDrawer(true)}>Add Asset</Button>
+
+        <Button style={{ backgroundColor: "#d1479d" }} type="primary" onClick={() => setDrawer(true)}>Add Asset</Button>
         <Modal
             open={modal}
             onOk={() => setModal(false)}

@@ -1,101 +1,104 @@
-import { createContext, useState, useEffect, useContext } from "react";
-import { fakeFetchCrypro, fetchAssets, addNewAsset, deleteAssets } from '../api';
+import { createContext, useState, useEffect, useContext, useMemo } from "react";
+import { fakeFetchCrypro, fetchAssets, addNewAsset, deleteAssetsByName } from '../api';
 import { percentDifference } from '../utility';
 
 const CryptoContext = createContext({
     assets: [],
-    crypro: [],
+    crypto: [],
     loading: false,
-})
+    addAsset: () => { },
+    deleteAssetsByName: () => { },
+});
 
 export function CryptoContextProvider({ children }) {
-    const [loading, setLoading] = useState(false)
-    const [crypto, setCrypto] = useState([])
-    const [assets, setAssets] = useState([])
+    const [loading, setLoading] = useState(false);
+    const [crypto, setCrypto] = useState([]);
+    const [assets, setAssets] = useState([]);
 
-    function mapAssets(asset, result) {
-        return asset.map(asset => {
-            const coin = result.find((c) => c.id === asset.name.toLowerCase());
-            if (!coin) {
-                console.warn(`Coin not found for asset with name: ${asset.name}`);
-                return {
-                    ...asset,
-                    grow: false,
-                    growPercent: 0,
-                    totalAmount: 0,
-                    totalProfit: 0,
-                    name: 'Unknown',
-                };
-            }
-            return {
-                grow: asset.price < coin.price,
-                growPercent: percentDifference(asset.price, coin.price),
-                totalAmount: asset.amount * coin.price,
-                totalProfit: asset.amount * (coin.price - asset.price),
-                name: coin.name,
-                ...asset,
-            };
-        });
-    }
+    const aggregatedAssets = useMemo(() => {
+        return assets.reduce((acc, asset) => {
+            const existing = acc.find(a => a.name === asset.name);
+            const coin = crypto.find(c => c.id === asset.name);
 
-    function addAsset(newAsset) {
-        async function postAsset(asset) {
-            try {
-                const response = await addNewAsset(asset);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+            if (coin) {
+                if (existing) {
+                    existing.amount += asset.amount;
+                    existing.totalAmount += asset.amount * coin.price;
+                    existing.totalProfit += asset.amount * (coin.price - asset.price);
+                } else {
+                    acc.push({
+                        ...asset,
+                        amount: asset.amount,
+                        totalAmount: asset.amount * coin.price,
+                        totalProfit: asset.amount * (coin.price - asset.price),
+                        grow: coin.price > asset.price,
+                        growPercent: percentDifference(asset.price, coin.price),
+                    });
                 }
-                const result = await response.json();
-                return result; // Сервер возвращает ассет с id
-            } catch (error) {
-                console.error('Error adding asset:', error);
-                throw error;
             }
-        }
+            return acc;
+        }, []);
+    }, [assets, crypto]);
 
-        postAsset(newAsset)
-            .then((addedAsset) => { // Используем ассет из ответа сервера
-                setAssets((prev) => mapAssets([...prev, addedAsset], crypto));
-            })
-            .catch((error) => {
-                console.error('Failed to add asset:', error);
+    // Исправленная функция addAsset с использованием функционального обновления состояния
+    const addAsset = async (newAsset) => {
+        try {
+            console.log("addAsset: newAsset перед addNewAsset:", newAsset); // <----- ADD THIS LOG
+            const tempAsset = { ...newAsset, id: Date.now() };
+            const addedAsset = await addNewAsset(tempAsset);
+            console.log("addAsset: addedAsset после addNewAsset:", addedAsset); // <----- ADD THIS LOG
+
+            setAssets(prevAssets => {
+                const updatedAssets = [...prevAssets, {
+                    ...addedAsset,
+                    id: addedAsset.id || tempAsset.id
+                }];
+                console.log("addAsset: updatedAssets перед setAssets:", updatedAssets); // <----- ADD THIS LOG
+                return updatedAssets;
             });
-    }
+        } catch (error) {
+            console.error('Error adding asset:', error);
+        }
+    };
 
+
+    const handleDeleteAssets = async (assetName) => {
+        try {
+            await deleteAssetsByName(assetName);
+            setAssets(prev => prev.filter(a => a.name !== assetName));
+        } catch (error) {
+            console.error('Error deleting assets:', error);
+        }
+    };
 
     useEffect(() => {
         async function preload() {
             setLoading(true);
             const result = await fakeFetchCrypro();
             const assets = await fetchAssets();
-
-            console.log('Fetched crypto:', result);
-            console.log('Fetched assets:', assets);
-
-            setAssets(mapAssets(assets, result));
+            setAssets(assets);
             setCrypto(result);
             setLoading(false);
         }
         preload();
     }, []);
 
-    const deleteAsset = async (assetId) => {
-        try {
-            await deleteAssets(assetId);
-            setAssets(prev => prev.filter(asset => asset.id !== assetId));
-
-        } catch (error) {
-            console.error('Delete asset error:', error);
-            throw error;
-        }
-    };
-
-    return <CryptoContext.Provider value={{ loading, crypto, assets, addAsset, deleteAsset }}>{children}</CryptoContext.Provider>
+    return (
+        <CryptoContext.Provider value={{
+            loading,
+            crypto,
+            assets: aggregatedAssets,
+            rawAssets: assets,
+            addAsset,
+            deleteAssetsByName: handleDeleteAssets
+        }}>
+            {children}
+        </CryptoContext.Provider>
+    );
 }
 
-export default CryptoContext
+export default CryptoContext;
 
 export function useCrypto() {
-    return useContext(CryptoContext)
+    return useContext(CryptoContext);
 }
-

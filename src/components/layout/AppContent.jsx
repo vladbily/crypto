@@ -7,24 +7,31 @@ const contentStyle = {
     textAlign: 'center',
     minHeight: 'calc(100vh - 60px)',
     color: '#fff',
-    backgroundColor: '#001529',
+    backgroundColor: '#26091b',
     padding: '1rem',
+    overflow: 'hidden'
 };
 
 export default function AppContent() {
-    const { assets, crypto } = useCrypto()
+    const { assets, crypto } = useCrypto();
     const cryptoPriceMap = crypto.reduce((acc, c) => {
-        acc[c.id] = c.price
-        return acc
-    }, {})
+        acc[c.id] = c.price;
+        return acc;
+    }, {});
 
-    return <Layout.Content style={contentStyle}>
-        <Typography.Title level={3} style={{ textAlign: 'left', color: '#fff' }}>
-            Portfolio: {' '}
-            {assets.map((asset) => asset.amount * cryptoPriceMap[asset.name])
-                .reduce((acc, v) => (acc += v), 0).toFixed(2)}$
-        </Typography.Title>
-        <PortfolioChart />
-        <AssetsTable />
-    </Layout.Content>
+    const totalValue = assets
+        .map((asset) => asset.amount * cryptoPriceMap[asset.name])
+        .reduce((acc, v) => acc + v, 0);
+
+    return (
+        <Layout.Content style={contentStyle}>
+            {assets.length > 0 && (
+                <Typography.Title level={3} style={{ textAlign: 'left', color: '#fff' }}>
+                    Portfolio: {totalValue.toFixed(2)}$
+                </Typography.Title>
+            )}
+            <PortfolioChart />
+            <AssetsTable />
+        </Layout.Content>
+    );
 }

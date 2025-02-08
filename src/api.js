@@ -26,12 +26,19 @@ export async function addNewAsset(asset) {
         },
         body: JSON.stringify(asset),
     });
-    return response
+
+    if (!response.ok) { // Добавьте проверку на ошибки HTTP
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to add asset'); // Обработка ошибок с деталями от сервера
+    }
+
+    return await response.json();
 }
 
-export async function deleteAssets(assetId) {
-    const response = await fetch(`http://localhost:8000/assets/${assetId}`, {
-        method: "DELETE",
+
+export const deleteAssetsByName = async (name) => {
+    const response = await fetch(`http://localhost:8000/assets/${name}`, {
+        method: 'DELETE',
         headers: {
             "Accept": "application/json",
             "Content-Type": "application/json"

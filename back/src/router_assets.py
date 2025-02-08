@@ -15,10 +15,10 @@ async def get_assets(asset_client: AssetClient = Depends(get_asset_client)):
 async def add_asset(asset: AssetBase, asset_client: AssetClient = Depends(get_asset_client)):
     return await asset_client.create(asset_data=asset)
 
-@router_assets.delete("/{asset_id}")
-async def delete_asset(asset_id: int, asset_client: AssetClient = Depends(get_asset_client)):
+@router_assets.delete("/{asset_name}")
+async def delete_asset(asset_name: str, asset_client: AssetClient = Depends(get_asset_client)):
     try:
-        await asset_client.delete(asset_id)
+        await asset_client.delete(asset_name)
         return {"status": "success"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,5 +1,6 @@
 import { Table } from 'antd';
 import { useCrypto } from '../context/crypto-context';
+
 const columns = [
     {
         title: 'Name',
@@ -30,29 +31,33 @@ const columns = [
         sorter: (a, b) => new Date(a.date) - new Date(b.date),
     },
 ];
-export default function AssetsTable() {
-    const { assets } = useCrypto()
 
-    if (assets.length === 0) {
-        return null;
+export default function AssetsTable() {
+    const { rawAssets } = useCrypto();
+    console.log("AssetsTable: rawAssets:", rawAssets);
+
+    if (rawAssets.length == 0) {
+        return null
     }
 
-    const data = assets.map((a) => ({
-        key: a.id,
-        name: a.name,
-        price: a.price,
-        amount: a.amount,
-        date: a.date
-    }))
+    return (
 
-    return <div style={{ height: 'calc(30vh - 16px)', overflowY: 'auto' }}>
-        <Table
-            pagination={false}
-            columns={columns}
-            dataSource={data}
-            showSorterTooltip={{
-                target: 'sorter-icon',
-            }}
-        />
-    </div>
+        <div style={{
+            height: 'calc(30vh - 16px)',
+            overflowY: 'auto',
+            margin: '16px 0',
+            border: '#f0f0f0',
+            borderRadius: 8
+        }}>
+            <Table
+                columns={columns}
+                dataSource={rawAssets}
+                pagination={false}
+                rowKey="id"
+                locale={{
+                    emptyText: 'Нет данных для отображения'
+                }}
+            />
+        </div>
+    );
 }

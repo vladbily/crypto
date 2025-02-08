@@ -3,3 +3,32 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+.custom-select.ant-select:not(.ant-select-disabled):hover .ant-select-selector {
+  border-color: #d1479d !important;
+}
+
+.custom-select.ant-select-focused .ant-select-selector {
+  border-color: #d1479d !important;
+}
+
+.custom-select.ant-select-open .ant-select-selector {
+  border-color: #d1479d !important;
+}
+
+/* Стили для формы */
+.custom-form .ant-input-number,
+.custom-form .ant-picker {
+  border-color: #d1479d !important;
+}
+
+/* Стили для кнопки */
+.custom-form .ant-btn-primary {
+  background-color: #d1479d !important;
+  border-color: #d1479d !important;
+}
+
+/* Стили для селектора */
+.custom-select .ant-select-selector {
+  border-color: #d1479d !important;
+}

@@ -37,21 +37,18 @@ export default function AddAssetForm({ onClose }) {
 
     if (!coin) {
         return (
-            <Select
-                style={{ width: '100%' }}
-                onSelect={v => setCoin(crypto.find((c) => c.id === v))}
+            <Select className="custom-select"
+                style={{ width: '100%', borderColor: '#d1479d' }} // Стиль для Select
+                onSelect={(v) => setCoin(crypto.find((c) => c.id === v))}
                 placeholder="Select Coin"
-
-                options={crypto.map(coin => ({
+                options={crypto.map((coin) => ({
                     label: coin.name,
                     value: coin.id,
                     icon: coin.icon,
                 }))}
                 optionRender={(option) => (
                     <Space>
-                        <img style={{ width: 20 }}
-                            src={option.data.icon}
-                            alt={option.data.label} />
+                        <img style={{ width: 20 }} src={option.data.icon} alt={option.data.label} />
                         {option.data.label}
                     </Space>
                 )}
@@ -92,58 +89,58 @@ export default function AddAssetForm({ onClose }) {
         })
     }
 
-    return <Form
+    return <Form className="custom-form"
         form={form}
         name="basic"
-        labelCol={{ span: 4, }}
-        wrapperCol={{ span: 10, }}
+        labelCol={{ span: 4 }}
+        wrapperCol={{ span: 10 }}
         style={{ maxWidth: 600 }}
-        initialValues={{
-            price: +coin.price.toFixed(2),
-        }}
+        initialValues={{ price: +coin.price.toFixed(2) }}
         onFinish={onFinish}
-        validateMessages={validateMessage}>
+        validateMessages={validateMessage}
+    >
         <CoinInfo coin={coin} />
         <Divider />
 
         <Form.Item
             label="Amount"
             name="amount"
-            rules={[
-                {
-                    required: true,
-                    type: 'number',
-                    min: 0,
-                },
-            ]}>
+            rules={[{ required: true, type: 'number', min: 0 }]}
+        >
             <InputNumber
-                placeholder="Enter coin amount "
+                placeholder="Enter coin amount"
                 onChange={handleAmountChange}
-                style={{ width: '100%' }} />
+                style={{ width: '100%', borderColor: '#d1479d' }} // Стиль для InputNumber
+            />
         </Form.Item>
 
-        <Form.Item
-            label="Price"
-            name="price">
+        <Form.Item label="Price" name="price">
             <InputNumber
-                style={{ width: '100%' }}
-                onChange={handlePriceChange} />
+                style={{ width: '100%', borderColor: '#d1479d' }} // Стиль для InputNumber
+                onChange={handlePriceChange}
+            />
         </Form.Item>
 
-        <Form.Item
-            label="Date"
-            name="date">
-            <DatePicker showTime />
+        <Form.Item label="Date" name="date">
+            <DatePicker
+                showTime
+                style={{ width: '100%', borderColor: '#d1479d' }} // Стиль для DatePicker
+            />
         </Form.Item>
 
-        <Form.Item
-            label="Total"
-            name="total">
-            <InputNumber disabled style={{ width: '100%' }} />
+        <Form.Item label="Total" name="total">
+            <InputNumber
+                disabled
+                style={{ width: '100%', borderColor: '#d1479d' }} // Стиль для InputNumber
+            />
         </Form.Item>
 
         <Form.Item label={null}>
-            <Button type="primary" htmlType="submit">
+            <Button
+                type="primary"
+                htmlType="submit"
+                style={{ backgroundColor: '#d1479d', borderColor: '#d1479d' }} // Стиль для кнопки
+            >
                 Add Asset
             </Button>
         </Form.Item>

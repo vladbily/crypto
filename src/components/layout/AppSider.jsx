@@ -1,49 +1,34 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Layout, Card, Statistic, List, Typography, Tag } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
-import CryptoContext from '../../context/crypto-context';
+import { useCrypto } from '../../context/crypto-context';
 import AppModal from './AppModal';
 
 const siderStyle = {
   padding: '1rem',
-  height: 'calc(100vh - 64px)',
+  height: 'calc(100vh - 60px)',
   overflowY: 'auto',
-  backgroundColor: '#001529' // Добавляем фон контейнера
+  backgroundColor: '#26091b',
 };
 
 export default function AppSider() {
-  const { assets, deleteAsset } = useContext(CryptoContext);
+  const { assets, deleteAssetsByName } = useCrypto();
+  console.log("AppSider: assets:", assets);
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   const handleCardClick = (asset) => {
     setSelectedAsset(asset);
     setIsModalOpen(true);
   };
 
-  const handleConfirmDelete = async () => {
-    try {
-      await deleteAsset(selectedAsset.id);
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error('Error deleting asset:', error);
-    }
-  };
-
   return (
-    <Layout.Sider
-      width="25%"
-      style={siderStyle}
-      theme="light" // Фикс белой полосы
-    >
+    <Layout.Sider width="25%" style={siderStyle} theme="light">
       {assets.map((asset) => (
         <Card
-          key={asset.id}
-          style={{
-            marginBottom: '1rem',
-            cursor: 'pointer',
-            borderRadius: '8px' // Фикс закруглений
-          }}
+          key={asset.id} // Убедитесь, что `id` уникален
+          style={{ marginBottom: '1rem', cursor: 'pointer', borderRadius: 8 }}
           onClick={() => handleCardClick(asset)}
         >
           <Statistic
@@ -58,10 +43,10 @@ export default function AppSider() {
             size="small"
             dataSource={[
               { title: 'Total Profit', value: asset.totalProfit, withTag: true },
-              { title: 'Amount', value: asset.amount, isPlain: true },
+              { title: 'Amount', value: asset.amount.toFixed(2), isPlain: true },
             ]}
             renderItem={(item) => (
-              <List.Item style={{ cursor: 'pointer' }}>
+              <List.Item>
                 <span>{item.title}</span>
                 <span>
                   {item.withTag && (
@@ -69,7 +54,7 @@ export default function AppSider() {
                       {asset.growPercent}%
                     </Tag>
                   )}
-                  {item.isPlain && <span>{item.value}</span>}
+                  {item.isPlain && item.value}
                   {!item.isPlain && (
                     <Typography.Text type={asset.grow ? 'success' : 'danger'}>
                       {item.value.toFixed(2)}$
@@ -83,10 +68,10 @@ export default function AppSider() {
       ))}
 
       <AppModal
-        isOpen={isModalOpen}
+        open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onDelete={handleConfirmDelete}
-        selectedAsset={selectedAsset}
+        onDelete={() => deleteAssetsByName(selectedAsset?.name)}
+        asset={selectedAsset}
       />
     </Layout.Sider>
   );

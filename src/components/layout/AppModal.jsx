@@ -1,55 +1,52 @@
 import React from 'react';
 import { Modal, Button, Typography } from 'antd';
+import { DeleteOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 
 const { confirm } = Modal;
 
-const AppModal = ({
-    isOpen,
-    onClose,
-    onDelete,
-    selectedAsset
-}) => {
-    const handleDeleteConfirm = () => {
+const AppModal = ({ open, onClose, onDelete, asset }) => {
+    const showDeleteConfirm = () => {
         confirm({
-            title: 'Are you sure?',
-            content: 'This action cannot be undone.',
-            okText: 'Delete',
+            title: 'Подтвердите удаление',
+            icon: <ExclamationCircleFilled />,
+            content: `Вы уверены, что хотите удалить все записи ${asset?.name}?`,
+            okText: 'Удалить',
             okType: 'danger',
-            cancelText: 'Cancel',
+            cancelText: 'Отмена',
             onOk() {
                 onDelete();
+                onClose();
             },
         });
     };
 
     return (
         <Modal
-            title="Asset Details"
-            open={isOpen}
+            title={`Управление ${asset?.name}`}
+            open={open}
             onCancel={onClose}
             footer={[
                 <Button
-                    danger
-                    onClick={handleDeleteConfirm}
                     key="delete"
+                    type="primary"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={showDeleteConfirm}
                 >
-                    Delete
+                    Удалить все
                 </Button>,
                 <Button key="cancel" onClick={onClose}>
-                    Close
+                    Закрыть
                 </Button>
             ]}
         >
-            {selectedAsset && (
+            {asset && (
                 <div>
-                    <Typography.Text strong>Asset Name:</Typography.Text>
-                    <p>{selectedAsset.name}</p>
+                    <Typography.Text strong>Общее количество:</Typography.Text>
+                    <p>{asset.amount}</p>
 
-                    <Typography.Text strong>Amount:</Typography.Text>
-                    <p>{selectedAsset.amount}</p>
-
-                    <Typography.Text strong>Total Value:</Typography.Text>
-                    <p>${selectedAsset.totalAmount.toFixed(2)}</p>
+                    <Typography.Text strong>Текущая стоимость:</Typography.Text>
+                    <p>${asset.totalAmount.toFixed(2)}</p>
                 </div>
             )}
         </Modal>
