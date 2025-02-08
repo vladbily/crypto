@@ -27,9 +27,9 @@ export async function addNewAsset(asset) {
         body: JSON.stringify(asset),
     });
 
-    if (!response.ok) { // Добавьте проверку на ошибки HTTP
+    if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to add asset'); // Обработка ошибок с деталями от сервера
+        throw new Error(errorData.detail || 'Failed to add asset')
     }
 
     return await response.json();

@@ -40,26 +40,26 @@ export function CryptoContextProvider({ children }) {
         }, []);
     }, [assets, crypto]);
 
-    // Исправленная функция addAsset с использованием функционального обновления состояния
     const addAsset = async (newAsset) => {
         try {
-            console.log("addAsset: newAsset перед addNewAsset:", newAsset); // <----- ADD THIS LOG
+            console.log("addAsset: newAsset перед addNewAsset:", newAsset);
             const tempAsset = { ...newAsset, id: Date.now() };
             const addedAsset = await addNewAsset(tempAsset);
-            console.log("addAsset: addedAsset после addNewAsset:", addedAsset); // <----- ADD THIS LOG
-
+            console.log("addAsset: addedAsset после addNewAsset:", addedAsset);
             setAssets(prevAssets => {
                 const updatedAssets = [...prevAssets, {
                     ...addedAsset,
                     id: addedAsset.id || tempAsset.id
                 }];
-                console.log("addAsset: updatedAssets перед setAssets:", updatedAssets); // <----- ADD THIS LOG
+                console.log("addAsset: updatedAssets перед setAssets:", updatedAssets);
                 return updatedAssets;
             });
         } catch (error) {
             console.error('Error adding asset:', error);
+            throw error;
         }
     };
+
 
 
     const handleDeleteAssets = async (assetName) => {

@@ -9,11 +9,18 @@ router_assets = APIRouter(
 
 @router_assets.get("/", response_model=list[AssetModel])
 async def get_assets(asset_client: AssetClient = Depends(get_asset_client)):
-    return await asset_client.get_all()
+    try:
+        return await asset_client.get_all()
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 @router_assets.post("/", response_model=AssetModel)
 async def add_asset(asset: AssetBase, asset_client: AssetClient = Depends(get_asset_client)):
-    return await asset_client.create(asset_data=asset)
+    try:
+        return await asset_client.create(asset_data=asset)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router_assets.delete("/{asset_name}")
 async def delete_asset(asset_name: str, asset_client: AssetClient = Depends(get_asset_client)):

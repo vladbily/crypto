@@ -18,6 +18,7 @@ export default function AddAssetForm({ onClose }) {
     const [coin, setCoin] = useState(null)
     const { crypto, addAsset } = useCrypto()
     const [submitted, setSubmitted] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
     const assetRef = useRef()
 
     if (submitted) {
@@ -34,11 +35,25 @@ export default function AddAssetForm({ onClose }) {
             />
         )
     }
+    if (errorMessage) {
+        return (
+            <Result
+                status="error"
+                title="Operation Failed"
+                subTitle={errorMessage}
+                extra={[
+                    <Button type="primary" key="console" onClick={() => setErrorMessage('')}>
+                        Close
+                    </Button>
+                ]}
+            />
+        );
+    }
 
     if (!coin) {
         return (
             <Select className="custom-select"
-                style={{ width: '100%', borderColor: '#d1479d' }} // Стиль для Select
+                style={{ width: '100%', borderColor: '#d1479d' }}
                 onSelect={(v) => setCoin(crypto.find((c) => c.id === v))}
                 placeholder="Select Coin"
                 options={crypto.map((coin) => ({
@@ -58,9 +73,16 @@ export default function AddAssetForm({ onClose }) {
 
     async function onFinish(values) {
         console.log('finish', values);
+        const amount = values.amount;
+
+        if (amount <= 0) {
+            setErrorMessage('Amount must be greater than 0');
+            return;
+        }
+
         const newAsset = {
             name: coin.id,
-            amount: values.amount,
+            amount: amount,
             price: values.price,
             date: values.date ? values.date.toISOString() : new Date().toISOString(),
         };
@@ -69,11 +91,13 @@ export default function AddAssetForm({ onClose }) {
         try {
             await addAsset(newAsset);
             setSubmitted(true);
+            setErrorMessage('');
         } catch (error) {
             console.error('Failed to add asset:', error);
+            setSubmitted(false);
+            setErrorMessage(error.message || 'Failed to add asset. Please try again.'); // Отображаем сообщение об ошибке
         }
     }
-
 
     function handleAmountChange(value) {
         const price = form.getFieldValue('price')
@@ -110,13 +134,13 @@ export default function AddAssetForm({ onClose }) {
             <InputNumber
                 placeholder="Enter coin amount"
                 onChange={handleAmountChange}
-                style={{ width: '100%', borderColor: '#d1479d' }} // Стиль для InputNumber
+                style={{ width: '100%', borderColor: '#d1479d' }}
             />
         </Form.Item>
 
         <Form.Item label="Price" name="price">
             <InputNumber
-                style={{ width: '100%', borderColor: '#d1479d' }} // Стиль для InputNumber
+                style={{ width: '100%', borderColor: '#d1479d' }}
                 onChange={handlePriceChange}
             />
         </Form.Item>
@@ -124,14 +148,14 @@ export default function AddAssetForm({ onClose }) {
         <Form.Item label="Date" name="date">
             <DatePicker
                 showTime
-                style={{ width: '100%', borderColor: '#d1479d' }} // Стиль для DatePicker
+                style={{ width: '100%', borderColor: '#d1479d' }}
             />
         </Form.Item>
 
         <Form.Item label="Total" name="total">
             <InputNumber
                 disabled
-                style={{ width: '100%', borderColor: '#d1479d' }} // Стиль для InputNumber
+                style={{ width: '100%', borderColor: '#d1479d' }}
             />
         </Form.Item>
 
@@ -139,7 +163,7 @@ export default function AddAssetForm({ onClose }) {
             <Button
                 type="primary"
                 htmlType="submit"
-                style={{ backgroundColor: '#d1479d', borderColor: '#d1479d' }} // Стиль для кнопки
+                style={{ backgroundColor: '#d1479d', borderColor: '#d1479d' }}
             >
                 Add Asset
             </Button>
