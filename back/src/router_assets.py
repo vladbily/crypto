@@ -18,8 +18,10 @@ async def get_assets(asset_client: AssetClient = Depends(get_asset_client)):
 @router_assets.post("/", response_model=AssetModel)
 async def add_asset(asset: AssetBase, asset_client: AssetClient = Depends(get_asset_client)):
     try:
+        print(f"Received asset: {asset}")  # Логируем данные
         return await asset_client.create(asset_data=asset)
     except ValueError as e:
+        print(f"Error adding asset: {e}")  # Логируем ошибку
         raise HTTPException(status_code=400, detail=str(e))
 
 @router_assets.delete("/{asset_name}")
